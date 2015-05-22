@@ -1,0 +1,104 @@
+1、ThinkPHP3.1.3版本可以这样链式调用
+$this->assign('wish',$wish)->display();
+
+
+2、foreach标签的使用
+<foreach name='wish' item='v'> 	==><?php foreach($wish as $key => $v)?>
+{$v.uid}
+</foreach>	==><?php endforeach;?>
+
+
+3、时间函数：
+{$v.time|date='Y-m-d H:i:s',###} 三个###表示把time放在这个参数当中
+原生的php函数是:date("Y-m-d H:i:s",time);
+
+
+4、配置参数:
+'TMPL_VAR_IDENTIFY' => 'array'　默认让$v.time这个‘.’操作采用数组方式读取，加快速度
+如果TMPL_VAR_IDENTIFY留空的话，系统会自动判断要输出的变量是数组还是对象，这种方式会一定程度上影响效率，而且只支持二维数组和两级对象属性。
+
+//模板后缀名
+'TMPL_TEMPLATE_SUFFIX' => '.htm'
+
+//伪静态配置，后缀名为html
+'URL_HTML_SUFFIX' =>'html'
+
+//URL形式
+'URL_MODEL'=0
+
+// 默认参数过滤方法 用于I函数...
+'DEFAULT_FILTER' => 'htmlspecialchars' 
+
+
+5、IS_POST方法
+作用：判断当前是否POST请求（3.1新增）
+
+判断是否是表单POST方式提交
+代码：if (!IS_POST) _404("页面不存在",U('index'));	//404方法跳转必须关闭调试模式，否则不跳转，弹出"页面不存在"提示
+
+如果需要我们可以使用下面的方法输出错误信息并中断执行：
+halt($msg)//输出错误信息，并中止执行
+halt("页面不存在")　也可以用这个方法输出错误页面，错误页面可以定制。
+
+
+6、表单过滤:
+$data=array(
+'username' => I('username','',htmlspecialchars),
+'content' => I('content','',htmlspecialchars),
+'time'=> time()
+);
+
+
+7、实例化模型的两种方法:
+M('wish')
+new Model('wish')
+很显示第一种方法比较简单一点。
+
+
+8、插入数据data方法：
+
+代码：
+
+	$data = array (
+	'username' => I('username'),
+	'content' => I('content'),
+	'time' => time()
+	);
+
+M('wish')->data($data)->add();
+
+
+9、删除数据delete方法:
+M('wish')->delete();	//当你传递delete方法的时候，ThinkPhp要求必须传递一个where条件。
+M('wish')->where('id > 0')->delete();	//字符串形式
+M('wish')->where(array('id' => array('gt',0)))->delete();	//数组形式，gt是大于，lt是小于，eq是等于
+M('wish')->where(array('id' => 0))->delete();	//id等于0的情况
+
+注意：删除大于0的所有记录。也就是把数据库里的内容全部删除
+
+
+10、生成随机数的函数:
+{:mt_rand(1, 5)}表示从1-5数字随机 => <?php echo mt rand(1, 5);?>
+
+
+11、U方法：
+
+U方法默认是不跳转的，只是生成地址。
+
+U('Index/index',array('uid' =>1),'html',0，true)　
+第一个参数　控制器/方法
+
+第二个参数　支持get方法路由功能，可以传递参数，用数组数组方式。
+
+第三个参数  是否指定伪静态后缀，函数会自动识别当前配置的伪静态后缀，如果你需要指定后缀生成URL地址的话，可以传入html。否则给''就行了。
+
+第四个参数  表示是否跳转。1表示跳转、0表示不跳转。
+
+第五个参数  显示是否显示前面的域名。如:http://localhost:8080/wish/index.php/Index/show
+
+
+12、I方法(3.1.3新增)：
+
+I('uid')自动判断是$_POST方式提交还是$_GET方式提交，从而获取到里面的值。
+
+类似的方法还有:$this->_post('uid');$this->_get('uid');
